@@ -24,8 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
-        run: docker build -t votre-username/projet-integration:latest .
+        run: docker build -t meriem121/projet-integration:latest .
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u votre-username --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u meriem121 21281425m
       - name: Push Docker image
-        run: docker push votre-username/projet-integration:latest
+        run: docker push meriem121/projet-integration:latest
