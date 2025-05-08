@@ -3,29 +3,71 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+
       - name: Install dependencies
-        run: pip install paramiko
+        run: |
+          pip install paramiko
+          pip install pytest
+
       - name: Run tests
-        run: python -m unittest discover tests
-  
+        run: |
+          python -m pytest tests/
+
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: docker build -t meriem121/projet-integration:latest .
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u meriem121 21281425m
-      - name: Push Docker image
-        run: docker push meriem121/projet-integration:latest
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            meriem121/projet-integration:latest
+            meriem121/projet-integration:${{ github.sha }}
+
+  deploy-ssh:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Run remote commands via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            docker pull meriem121/projet-integration:latest &&
+            docker stop monitoring-app || true &&
+            docker rm monitoring-app || true &&
+            docker run -d --name monitoring-app meriem121/projet-integration:latest
+          "
