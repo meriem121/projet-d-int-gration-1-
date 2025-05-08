@@ -17,7 +17,7 @@ class SystemMonitor:
                 self.ssh.connect(self.host, username=self.username, password=self.password)
             elif self.key_path:
                 self.ssh.connect(self.host, username=self.username, key_filename=self.key_path)
-            print(f"✅ Connecté à {self.host}")
+            print(f" Connecté à {self.host}")
             return True
         except Exception as e:
             print(f"❌ Échec de la connexion : {e}")
