@@ -1,15 +1,13 @@
-# Utiliser une image Python officielle
 FROM python:3.9-slim
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers nécessaires
+# Copie avec vérification explicite
 COPY requirements.txt .
-COPY src/ ./src/
+COPY src/monitor.py ./src/monitor.py
 
-# Installer les dépendances
-RUN pip install --no-cache-dir -r requirements.txt
+# Installation des dépendances avec vérification
+RUN pip install --no-cache-dir -r requirements.txt && \
+    [ -f "/app/src/monitor.py" ] || { echo "ERREUR: monitor.py non trouvé"; exit 1; }
 
-# Définir la commande par défaut
 CMD ["python", "./src/monitor.py"]
