@@ -55,6 +55,5 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/system-monitor:latest
     
   
-      - 
-
+  
      
