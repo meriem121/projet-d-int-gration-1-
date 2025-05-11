@@ -39,12 +39,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4  # Required to access your code/Dockerfile
       - name: Build and push Docker image
-  uses: docker/build-push-action@v5
-  with:
-    context: .
-    file: ./Dockerfile  # Chemin explicite
-    push: true
-    tags: ${{ secrets.DOCKERHUB_USERNAME }}/system-monitor:latest
+        uses: docker/build-push-action@v5
+        with:
+           context: .
+           file: ./Dockerfile  # Chemin explicite
+           push: true
+           tags: ${{ secrets.DOCKERHUB_USERNAME }}/system-monitor:latest
 
       - 
 
